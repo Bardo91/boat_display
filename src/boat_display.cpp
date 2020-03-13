@@ -29,6 +29,11 @@ int main(int _argc, char** _argv){
     rosex::Compass c;
     c.show();
 
+    QCursor cursor(Qt::BlankCursor);
+    QApplication::setOverrideCursor(cursor);
+    QApplication::changeOverrideCursor(cursor);
+
+
     std::thread th([&](){
         float orientation = 0;
         float orientationSpeed = 1;

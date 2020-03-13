@@ -46,7 +46,7 @@ namespace rosex{
         p.drawImage(QPoint(0,0), waterBg_);
         // p.setOpacity(0.2);
 
-        p.drawImage(QPoint(0,0), compass_);
+        p.drawImage(QPoint(10,10), compass_);
 
         QMatrix matrix;
         matrix.rotate(counter+=1);
