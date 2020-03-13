@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "qimagereader": "cpp",
+        "*.tcc": "cpp",
+        "qmainwindow": "cpp"
+    }
+}

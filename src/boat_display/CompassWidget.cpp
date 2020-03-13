@@ -21,27 +21,42 @@
 
 #include <boat_display/CompassWidget.h>
 
+#include <QImageReader>
 
 namespace rosex{
-    Compass::Compass(QWidget *parent) : QWidget(parent) {
-        rect = QRect(0, 0, 300, 300);
-    }
+    Compass::Compass(QWidget *parent) : QMainWindow(parent) {
+        this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+        this->setWindowState(Qt::WindowFullScreen);
+        this->showFullScreen();
 
-    QSize Compass::sizeHint() const {
-        return rect.size();
+        waterBg_ = loadImage("/home/bardo91/programming/boat_display/resources/water_bg.jpg");
+        compass_ = loadImage("/home/bardo91/programming/boat_display/resources/compass.png");
+        arrow_ = loadImage("/home/bardo91/programming/boat_display/resources/arrow.png");
     }
 
     void Compass::paintEvent(QPaintEvent *event) {
         Q_UNUSED(event);
         QPainter p(this);
         p.setRenderHint(QPainter::Antialiasing, true);
-        p.drawEllipse(rect);
+        // p.drawImage(QPoint(0,0), waterBg_);
 
-        p.save();
-        p.translate(rect.center());
-        p.rotate(orientation_);
-        p.drawRect(QRect(-50, -25, 100, 50));
-        p.restore();
+        p.drawImage(QPoint(0,0), compass_);
+
+        p.drawImage(QPoint(winSize[1]/2 - 50,winSize[1]/2- 50), arrow_);
+
+        //p.save();
+        //p.translate(rect.center());
+        //p.rotate(orientation_);
+        //p.drawRect(QRect(-50, -25, 100, 50));
+        //p.restore();
+    }
+
+
+    QImage Compass::loadImage(const QString &_fileName){
+        QImageReader reader(_fileName);
+        reader.setAutoTransform(true);
+        QImage image = reader.read();
+        return image;
     }
 
     void Compass::updateOrientation(float _ori){

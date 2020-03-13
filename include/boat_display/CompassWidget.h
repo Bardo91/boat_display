@@ -22,24 +22,31 @@
 #define ROSEX_BOATDISPLAY_COMPASSWIDGET_H_
 
 #include <QtGui>
-#include <QWidget>
-
+#include <QMainWindow>
 namespace rosex{
 
-    class Compass : public QWidget {
+    class Compass : public QMainWindow {
+        Q_OBJECT
+
         public:
-            Compass(QWidget *parent = 0);
+            explicit Compass(QWidget *parent = 0);
         
-            QSize sizeHint() const;
+            ~Compass(){}
+            // QSize sizeHint() const;
         
             void updateOrientation(float _ori);
 
         protected:
             void paintEvent(QPaintEvent *event);
-        
+
+            QImage loadImage(const QString &_filename);
+
         private:
             QRect rect;
             float orientation_ = 0;
+
+            QImage waterBg_, compass_, arrow_;
+            const int winSize[2] = {800, 480};
     };
 
 }
