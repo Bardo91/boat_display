@@ -34,15 +34,28 @@ namespace rosex{
         arrow_ = loadImage("/home/bardo91/programming/boat_display/resources/arrow.png");
     }
 
+    float counter = 0;
     void Compass::paintEvent(QPaintEvent *event) {
         Q_UNUSED(event);
         QPainter p(this);
+        p.setFont(QFont( "Arial", 50 ));
         p.setRenderHint(QPainter::Antialiasing, true);
-        // p.drawImage(QPoint(0,0), waterBg_);
+        p.drawImage(QPoint(0,0), waterBg_);
+        // p.setOpacity(0.2);
 
         p.drawImage(QPoint(0,0), compass_);
 
-        p.drawImage(QPoint(winSize[1]/2 - 50,winSize[1]/2- 50), arrow_);
+        QMatrix matrix;
+        matrix.rotate(counter+=1);
+        QImage arrowRot = arrow_.transformed(matrix);
+
+        p.drawImage(QPoint( winSize[1]/2 - arrowRot.rect().center().x(),
+                            winSize[1]/2 - arrowRot.rect().center().y()), arrowRot);
+
+
+        const QRect rectangle = QRect(winSize[1]+ 50, 50, 240, 100);
+        QRect boundingRect;
+        p.drawText( rectangle, 0, std::to_string(counter).c_str(),&boundingRect);
 
         //p.save();
         //p.translate(rect.center());
