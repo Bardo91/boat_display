@@ -29,9 +29,12 @@ namespace rosex{
         this->setWindowState(Qt::WindowFullScreen);
         this->showFullScreen();
 
-        waterBg_ = loadImage("/home/bardo91/programming/boat_display/resources/water_bg.jpg");
-        compass_ = loadImage("/home/bardo91/programming/boat_display/resources/compass.png");
-        arrow_ = loadImage("/home/bardo91/programming/boat_display/resources/arrow.png");
+
+        std::string userDir(getenv("USER"));
+        std::string resourcesDir = "/home/"+userDir+"/.boat_display/resources/";
+        waterBg_ = loadImage(resourcesDir+"water_bg.png");
+        compass_ = loadImage(resourcesDir+"compass.png");
+        arrow_ = loadImage(resourcesDir+"arrow.png");
     }
 
     float counter = 0;
@@ -65,8 +68,8 @@ namespace rosex{
     }
 
 
-    QImage Compass::loadImage(const QString &_fileName){
-        QImageReader reader(_fileName);
+    QImage Compass::loadImage(const std::string &_fileName){
+        QImageReader reader(_fileName.c_str());
         reader.setAutoTransform(true);
         QImage image = reader.read();
         return image;

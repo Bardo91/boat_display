@@ -39,7 +39,7 @@ namespace rosex{
         protected:
             void paintEvent(QPaintEvent *event);
 
-            QImage loadImage(const QString &_filename);
+            QImage loadImage(const std::string &_filename);
 
         private:
             QRect rect;

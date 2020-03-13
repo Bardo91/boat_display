@@ -40,3 +40,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 ## Project dependenciess
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets)
+
+
+install(DIRECTORY resources DESTINATION $ENV{HOME}/.boat_display FILES_MATCHING PATTERN "*")
