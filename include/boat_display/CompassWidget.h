@@ -23,6 +23,8 @@
 
 #include <QtGui>
 #include <QMainWindow>
+#include <boat_display/ADS1115.h>
+
 namespace rosex{
 
     class Compass : public QMainWindow {
@@ -47,6 +49,8 @@ namespace rosex{
 
             QImage waterBg_, compass_, arrow_;
             const int winSize[2] = {800, 480};
+
+            ADS1115 sensorHandler_;
     };
 
 }

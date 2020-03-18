@@ -35,10 +35,38 @@ namespace rosex{
         waterBg_ = loadImage(resourcesDir+"water_bg.png");
         compass_ = loadImage(resourcesDir+"compass.png");
         arrow_ = loadImage(resourcesDir+"arrow.png");
+
+        sensorHandler_.getAddr_ADS1115(ADS1115_DEFAULT_ADDRESS);   // 0x48, 1001 000 (ADDR = GND)
+
+        // The ADC gain (PGA), Device operating mode, Data rate can be changed via the following functions
+        sensorHandler_.setGain(GAIN_TWO);          // 2x gain   +/- 2.048V  1 bit = 0.0625mV (default)
+        // sensorHandler_.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 0.1875mV
+        // sensorHandler_.setGain(GAIN_ONE);       // 1x gain   +/- 4.096V  1 bit = 0.125mV
+        // sensorHandler_.setGain(GAIN_FOUR);      // 4x gain   +/- 1.024V  1 bit = 0.03125mV
+        // sensorHandler_.setGain(GAIN_EIGHT);     // 8x gain   +/- 0.512V  1 bit = 0.015625mV
+        // sensorHandler_.setGain(GAIN_SIXTEEN);   // 16x gain  +/- 0.256V  1 bit = 0.0078125mV
+
+        sensorHandler_.setMode(MODE_CONTIN);       // Continuous conversion mode
+        // sensorHandler_.setMode(MODE_SINGLE);    // Power-down single-shot mode (default)
+
+        sensorHandler_.setRate(RATE_128);          // 128SPS (default)
+        // sensorHandler_.setRate(RATE_8);         // 8SPS
+        // sensorHandler_.setRate(RATE_16);        // 16SPS
+        // sensorHandler_.setRate(RATE_32);        // 32SPS
+        // sensorHandler_.setRate(RATE_64);        // 64SPS
+        // sensorHandler_.setRate(RATE_250);       // 250SPS
+        // sensorHandler_.setRate(RATE_475);       // 475SPS
+        // sensorHandler_.setRate(RATE_860);       // 860SPS
+
+        sensorHandler_.setOSMode(OSMODE_SINGLE);   // Set to start a single-conversion
+
+        sensorHandler_.begin();
     }
 
-    float counter = 0;
     void Compass::paintEvent(QPaintEvent *event) {
+
+        uint16_t signal = sensorHandler_.Measure_SingleEnded(0);
+
         Q_UNUSED(event);
         QPainter p(this);
         p.setFont(QFont( "Arial", 50 ));
@@ -49,7 +77,7 @@ namespace rosex{
         p.drawImage(QPoint(10,10), compass_);
 
         QMatrix matrix;
-        matrix.rotate(counter+=1);
+        matrix.rotate(signal);
         QImage arrowRot = arrow_.transformed(matrix);
 
         p.drawImage(QPoint( winSize[1]/2 - arrowRot.rect().center().x(),
@@ -58,7 +86,7 @@ namespace rosex{
 
         const QRect rectangle = QRect(winSize[1]+ 50, 50, 240, 100);
         QRect boundingRect;
-        p.drawText( rectangle, 0, std::to_string(counter).c_str(),&boundingRect);
+        p.drawText( rectangle, 0, std::to_string(signal).c_str(),&boundingRect);
 
         //p.save();
         //p.translate(rect.center());
