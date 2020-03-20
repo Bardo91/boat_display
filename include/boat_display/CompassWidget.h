@@ -29,6 +29,8 @@
 
 #include <atomic>
 #include <thread>
+#include <mutex>
+
 namespace rosex{
 
     class Compass : public QMainWindow {
@@ -62,7 +64,7 @@ namespace rosex{
             bool run_ = false;
             std::thread readingThread_;
 
-            std::atomic<int> lastSignal_ ;
+            std::atomic<int> lastSignal_;
 
     };
 

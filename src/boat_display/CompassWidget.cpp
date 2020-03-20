@@ -22,6 +22,8 @@
 #include <boat_display/CompassWidget.h>
 
 #include <QImageReader>
+#include <iostream>
+#include <algorithm>
 
 namespace rosex{
     Compass::Compass(QWidget *parent) : QMainWindow(parent) {
@@ -39,16 +41,18 @@ namespace rosex{
         // initI2C();
 
         if (!serialPort_) {
-            serialPort_ = new serial::Serial("/dev/ttyACM0", 115200, serial::Timeout::simpleTimeout(20));
+            serialPort_ = new serial::Serial("/dev/ttyACM0", 115200, serial::Timeout::simpleTimeout(1000));
             if (serialPort_->isOpen()) {
-                serialPort_->setTimeout(serial::Timeout::max(), serial::Timeout::max(), 0, 0, 0); // why?
+		std::cout << "Opened Serial Port" << std::endl;
             }
         }
 
+	run_ = true;
         readingThread_ = std::thread([&](){
             while(run_){
                 std::string line = serialPort_->readline();
                 lastSignal_ = atoi(line.c_str());
+//		std::cout <<lastSignal <<std::endl;
             }
         });
 
@@ -57,7 +61,7 @@ namespace rosex{
     Compass::~Compass(){
         run_ = false;
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        
+
         if(serialPort_ != nullptr && serialPort_->isOpen()){
             serialPort_->close();
         }
@@ -69,7 +73,13 @@ namespace rosex{
     void Compass::paintEvent(QPaintEvent *event) {
 
         // uint16_t signal = sensorHandler_.Measure_SingleEnded(0);
-        float signal = lastSignal_;
+	float signalF = lastSignal_;
+
+	const float MIN_VAL = 170;
+	const float MAX_VAL = 850;
+
+	signalF = (MAX_VAL-signalF)/(MAX_VAL-MIN_VAL)*360;
+	int signal = int(signalF);
 
         Q_UNUSED(event);
         QPainter p(this);
