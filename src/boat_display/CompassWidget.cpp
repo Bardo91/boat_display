@@ -36,36 +36,40 @@ namespace rosex{
         compass_ = loadImage(resourcesDir+"compass.png");
         arrow_ = loadImage(resourcesDir+"arrow.png");
 
-        sensorHandler_.getAddr_ADS1115(ADS1115_DEFAULT_ADDRESS);   // 0x48, 1001 000 (ADDR = GND)
+        // initI2C();
 
-        // The ADC gain (PGA), Device operating mode, Data rate can be changed via the following functions
-        sensorHandler_.setGain(GAIN_TWO);          // 2x gain   +/- 2.048V  1 bit = 0.0625mV (default)
-        // sensorHandler_.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 0.1875mV
-        // sensorHandler_.setGain(GAIN_ONE);       // 1x gain   +/- 4.096V  1 bit = 0.125mV
-        // sensorHandler_.setGain(GAIN_FOUR);      // 4x gain   +/- 1.024V  1 bit = 0.03125mV
-        // sensorHandler_.setGain(GAIN_EIGHT);     // 8x gain   +/- 0.512V  1 bit = 0.015625mV
-        // sensorHandler_.setGain(GAIN_SIXTEEN);   // 16x gain  +/- 0.256V  1 bit = 0.0078125mV
+        if (!serialPort_) {
+            serialPort_ = new serial::Serial("/dev/ttyACM0", 115200, serial::Timeout::simpleTimeout(20));
+            if (serialPort_->isOpen()) {
+                serialPort_->setTimeout(serial::Timeout::max(), serial::Timeout::max(), 0, 0, 0); // why?
+            }
+        }
 
-        sensorHandler_.setMode(MODE_CONTIN);       // Continuous conversion mode
-        // sensorHandler_.setMode(MODE_SINGLE);    // Power-down single-shot mode (default)
+        readingThread_ = std::thread([&](){
+            while(run_){
+                std::string line = serialPort_->readline();
+                lastSignal_ = atoi(line.c_str());
+            }
+        });
 
-        sensorHandler_.setRate(RATE_128);          // 128SPS (default)
-        // sensorHandler_.setRate(RATE_8);         // 8SPS
-        // sensorHandler_.setRate(RATE_16);        // 16SPS
-        // sensorHandler_.setRate(RATE_32);        // 32SPS
-        // sensorHandler_.setRate(RATE_64);        // 64SPS
-        // sensorHandler_.setRate(RATE_250);       // 250SPS
-        // sensorHandler_.setRate(RATE_475);       // 475SPS
-        // sensorHandler_.setRate(RATE_860);       // 860SPS
+    }
 
-        sensorHandler_.setOSMode(OSMODE_SINGLE);   // Set to start a single-conversion
+    Compass::~Compass(){
+        run_ = false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        
+        if(serialPort_ != nullptr && serialPort_->isOpen()){
+            serialPort_->close();
+        }
 
-        sensorHandler_.begin();
+        if(readingThread_.joinable())
+            readingThread_.join();
     }
 
     void Compass::paintEvent(QPaintEvent *event) {
 
-        uint16_t signal = sensorHandler_.Measure_SingleEnded(0);
+        // uint16_t signal = sensorHandler_.Measure_SingleEnded(0);
+        float signal = lastSignal_;
 
         Q_UNUSED(event);
         QPainter p(this);
@@ -106,5 +110,34 @@ namespace rosex{
     void Compass::updateOrientation(float _ori){
         orientation_ = _ori;
         this->update();
+    }
+
+    void Compass::initI2C(){
+
+        sensorHandler_.getAddr_ADS1115(ADS1115_DEFAULT_ADDRESS);   // 0x48, 1001 000 (ADDR = GND)
+
+        // The ADC gain (PGA), Device operating mode, Data rate can be changed via the following functions
+        sensorHandler_.setGain(GAIN_TWO);          // 2x gain   +/- 2.048V  1 bit = 0.0625mV (default)
+        // sensorHandler_.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 0.1875mV
+        // sensorHandler_.setGain(GAIN_ONE);       // 1x gain   +/- 4.096V  1 bit = 0.125mV
+        // sensorHandler_.setGain(GAIN_FOUR);      // 4x gain   +/- 1.024V  1 bit = 0.03125mV
+        // sensorHandler_.setGain(GAIN_EIGHT);     // 8x gain   +/- 0.512V  1 bit = 0.015625mV
+        // sensorHandler_.setGain(GAIN_SIXTEEN);   // 16x gain  +/- 0.256V  1 bit = 0.0078125mV
+
+        sensorHandler_.setMode(MODE_CONTIN);       // Continuous conversion mode
+        // sensorHandler_.setMode(MODE_SINGLE);    // Power-down single-shot mode (default)
+
+        sensorHandler_.setRate(RATE_128);          // 128SPS (default)
+        // sensorHandler_.setRate(RATE_8);         // 8SPS
+        // sensorHandler_.setRate(RATE_16);        // 16SPS
+        // sensorHandler_.setRate(RATE_32);        // 32SPS
+        // sensorHandler_.setRate(RATE_64);        // 64SPS
+        // sensorHandler_.setRate(RATE_250);       // 250SPS
+        // sensorHandler_.setRate(RATE_475);       // 475SPS
+        // sensorHandler_.setRate(RATE_860);       // 860SPS
+
+        sensorHandler_.setOSMode(OSMODE_SINGLE);   // Set to start a single-conversion
+
+        sensorHandler_.begin();
     }
 }

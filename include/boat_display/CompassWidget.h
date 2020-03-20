@@ -25,6 +25,10 @@
 #include <QMainWindow>
 #include <boat_display/ADS1115.h>
 
+#include <serial/serial.h>
+
+#include <atomic>
+#include <thread>
 namespace rosex{
 
     class Compass : public QMainWindow {
@@ -33,7 +37,7 @@ namespace rosex{
         public:
             explicit Compass(QWidget *parent = 0);
         
-            ~Compass(){}
+            ~Compass();
             // QSize sizeHint() const;
         
             void updateOrientation(float _ori);
@@ -43,14 +47,23 @@ namespace rosex{
 
             QImage loadImage(const std::string &_filename);
 
+            void initI2C();
+
         private:
             QRect rect;
-            float orientation_ = 0;
+            float orientation_;
 
             QImage waterBg_, compass_, arrow_;
             const int winSize[2] = {800, 480};
 
             ADS1115 sensorHandler_;
+
+            serial::Serial *serialPort_ = nullptr;
+            bool run_ = false;
+            std::thread readingThread_;
+
+            std::atomic<int> lastSignal_ ;
+
     };
 
 }
