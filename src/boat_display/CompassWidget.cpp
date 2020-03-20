@@ -77,9 +77,11 @@ namespace rosex{
 
 	const float MIN_VAL = 170;
 	const float MAX_VAL = 850;
+	const int DIVISION_FACTOR = 5;
 
 	signalF = (MAX_VAL-signalF)/(MAX_VAL-MIN_VAL)*360;
 	int signal = int(signalF);
+	signal = signal / DIVISION_FACTOR * DIVISION_FACTOR;
 
         Q_UNUSED(event);
         QPainter p(this);
