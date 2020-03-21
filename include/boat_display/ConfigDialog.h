@@ -22,14 +22,19 @@
 #define BOATDISPLAT_CONFIGDIALOG_H_
 
 #include <QDialog>
+#include <QLabel>
+#include <QSpinBox>
 
 namespace rosex{
     class ConfigDialog: public QDialog{
         Q_OBJECT
     public:
-
+        explicit ConfigDialog(std::atomic<int> &_signal, QWidget *_parent = 0);
+    
     private:
-
+        QLabel *valLabel_;
+        QSpinBox *minSpin_, *maxSpin_, *divisionSpin_, *directionSpin_;
+        std::atomic<int> &signal_;
     };
 }
 

@@ -175,7 +175,7 @@ namespace rosex{
             if ((key->key() == Qt::Key_O)  &&  (key->modifiers() & Qt::ControlModifier) ) {
                 // ctrl+c pressed
                 std::cout <<"pressed ctrl+o" << std::endl;
-                ConfigDialog configDialog;
+                ConfigDialog configDialog(lastSignal_);
                 configDialog.exec();
             } 
         }
