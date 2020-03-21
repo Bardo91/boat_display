@@ -18,63 +18,20 @@
 //
 //---------------------------------------------------------------------------------------------------------------------
 
-#ifndef ROSEX_BOATDISPLAY_COMPASSWIDGET_H_
-#define ROSEX_BOATDISPLAY_COMPASSWIDGET_H_
+#ifndef BOATDISPLAT_CONFIGDIALOG_H_
+#define BOATDISPLAT_CONFIGDIALOG_H_
 
-#include <QtGui>
-#include <QMainWindow>
-#include <boat_display/ADS1115.h>
-
-#include <serial/serial.h>
-
-#include <atomic>
-#include <thread>
-#include <mutex>
+#include <QDialog>
 
 namespace rosex{
-
-    class Compass : public QMainWindow {
+    class ConfigDialog: public QDialog{
         Q_OBJECT
+    public:
 
-        public:
-            explicit Compass(QWidget *parent = 0);
-        
-            ~Compass();
-            // QSize sizeHint() const;
-        
-            void updateOrientation(float _ori);
-
-        protected:
-            void paintEvent(QPaintEvent *event);
-
-            QImage loadImage(const std::string &_filename);
-
-            void initI2C();
-
-            void keyPressEvent(QKeyEvent *_event) override;
-
-        private:
-            QRect rect;
-            float orientation_;
-
-            QImage waterBg_, compass_, arrow_;
-            const int winSize[2] = {800, 480};
-
-            ADS1115 sensorHandler_;
-
-            serial::Serial *serialPort_ = nullptr;
-            bool run_ = false;
-            std::thread readingThread_;
-
-            std::atomic<int> lastSignal_;
-
-            const float MIN_VAL = 170;
-            const float MAX_VAL = 850;
-            const int DIVISION_FACTOR = 5;
-            const int DIRECTION = -1;
+    private:
 
     };
-
 }
+
 
 #endif

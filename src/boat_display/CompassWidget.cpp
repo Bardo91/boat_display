@@ -25,6 +25,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include <boat_display/ConfigDialog.h>
+
 namespace rosex{
     Compass::Compass(QWidget *parent) : QMainWindow(parent) {
         this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
@@ -38,23 +40,40 @@ namespace rosex{
         compass_ = loadImage(resourcesDir+"compass.png");
         arrow_ = loadImage(resourcesDir+"arrow.png");
 
+        lastSignal_ = MIN_VAL;
+
         // initI2C();
 
         if (!serialPort_) {
-            serialPort_ = new serial::Serial("/dev/ttyACM0", 115200, serial::Timeout::simpleTimeout(1000));
-            if (serialPort_->isOpen()) {
-		std::cout << "Opened Serial Port" << std::endl;
+            try{
+                serialPort_ = new serial::Serial("/dev/ttyACM0", 115200, serial::Timeout::simpleTimeout(1000));
+            }catch(serial::IOException _e){
+                std::cout << _e.what() <<std::endl;;
+                serialPort_ = nullptr;
+            }
+            if (serialPort_ != nullptr && serialPort_->isOpen()) {
+                std::cout << "Opened Serial Port" << std::endl;
+
+                run_ = true;
+                readingThread_ = std::thread([&](){
+                    while(run_){
+                        std::string line = serialPort_->readline();
+                        lastSignal_ = atoi(line.c_str());
+                    }
+                });
+            }else{
+                std::cout << "Faking serial connection" << std::endl;
+                run_ = true;
+                static int signalFake = MIN_VAL;
+                readingThread_ = std::thread([&](){
+                    while(run_){
+                        lastSignal_ = signalFake++;
+                        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                    }
+                });
             }
         }
 
-	run_ = true;
-        readingThread_ = std::thread([&](){
-            while(run_){
-                std::string line = serialPort_->readline();
-                lastSignal_ = atoi(line.c_str());
-//		std::cout <<lastSignal <<std::endl;
-            }
-        });
 
     }
 
@@ -73,15 +92,11 @@ namespace rosex{
     void Compass::paintEvent(QPaintEvent *event) {
 
         // uint16_t signal = sensorHandler_.Measure_SingleEnded(0);
-	float signalF = lastSignal_;
+        float signalF = lastSignal_;
 
-	const float MIN_VAL = 170;
-	const float MAX_VAL = 850;
-	const int DIVISION_FACTOR = 5;
-
-	signalF = (MAX_VAL-signalF)/(MAX_VAL-MIN_VAL)*360;
-	int signal = int(signalF);
-	signal = signal / DIVISION_FACTOR * DIVISION_FACTOR;
+        signalF = (MAX_VAL-signalF)/(MAX_VAL-MIN_VAL)*360;
+        int signal = int(signalF);
+        signal = signal / DIVISION_FACTOR * DIVISION_FACTOR;
 
         Q_UNUSED(event);
         QPainter p(this);
@@ -93,7 +108,7 @@ namespace rosex{
         p.drawImage(QPoint(10,10), compass_);
 
         QMatrix matrix;
-        matrix.rotate(signal);
+        matrix.rotate(DIRECTION*signal);
         QImage arrowRot = arrow_.transformed(matrix);
 
         p.drawImage(QPoint( winSize[1]/2 - arrowRot.rect().center().x(),
@@ -152,4 +167,18 @@ namespace rosex{
 
         sensorHandler_.begin();
     }
+
+
+    void Compass::keyPressEvent(QKeyEvent *_event){
+        if (_event->type()==QEvent::KeyPress) {
+            QKeyEvent* key = static_cast<QKeyEvent*>(_event);
+            if ((key->key() == Qt::Key_O)  &&  (key->modifiers() & Qt::ControlModifier) ) {
+                // ctrl+c pressed
+                std::cout <<"pressed ctrl+o" << std::endl;
+                ConfigDialog configDialog;
+                configDialog.exec();
+            } 
+        }
+    }
+
 }
