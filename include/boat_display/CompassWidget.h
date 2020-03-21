@@ -68,10 +68,10 @@ namespace rosex{
 
             std::atomic<int> lastSignal_;
 
-            const float MIN_VAL = 170;
-            const float MAX_VAL = 850;
-            const int DIVISION_FACTOR = 5;
-            const int DIRECTION = -1;
+            float MIN_VAL = 170;
+            float MAX_VAL = 850;
+            int DIVISION_FACTOR = 5;
+            int DIRECTION = -1;
 
     };
 

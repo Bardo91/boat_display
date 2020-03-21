@@ -21,12 +21,15 @@
 
 #include <boat_display/CompassWidget.h>
 
-#include <QImageReader>
 #include <iostream>
+#include <fstream>
+
+#include <QImageReader>
 #include <algorithm>
 
 #include <boat_display/ConfigDialog.h>
 
+#include <yaml-cpp/yaml.h>
 namespace rosex{
     Compass::Compass(QWidget *parent) : QMainWindow(parent) {
         this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
@@ -39,6 +42,20 @@ namespace rosex{
         waterBg_ = loadImage(resourcesDir+"water_bg.png");
         compass_ = loadImage(resourcesDir+"compass.png");
         arrow_ = loadImage(resourcesDir+"arrow.png");
+
+
+        // Load defaults
+        YAML::Node paramFile;
+        try{
+            paramFile = YAML::LoadFile("/home/"+userDir+"/.boat_display/config/config.yml");
+        }catch(YAML::ParserException _e){
+            assert(false);
+        }
+
+        MIN_VAL = paramFile["min_val"].as<int>();
+        MAX_VAL = paramFile["max_val"].as<int>();
+        DIVISION_FACTOR = paramFile["division_factor"].as<int>();
+        DIRECTION = paramFile["direction"].as<int>();
 
         lastSignal_ = MIN_VAL;
 
@@ -174,9 +191,25 @@ namespace rosex{
             QKeyEvent* key = static_cast<QKeyEvent*>(_event);
             if ((key->key() == Qt::Key_O)  &&  (key->modifiers() & Qt::ControlModifier) ) {
                 // ctrl+c pressed
-                std::cout <<"pressed ctrl+o" << std::endl;
+                // std::cout <<"pressed ctrl+o" << std::endl;
                 ConfigDialog configDialog(lastSignal_);
                 configDialog.exec();
+
+                MIN_VAL         = configDialog.minVal();
+                MAX_VAL         = configDialog.maxVal();
+                DIVISION_FACTOR = configDialog.divisionVal();
+                DIRECTION       = configDialog.directionVal();
+
+                // Save defaults
+                std::string userDir(getenv("USER"));
+                std::ofstream file("/home/"+userDir+"/.boat_display/config/config.yml");
+                
+                YAML::Node paramFile;
+                paramFile["min_val"]            = MIN_VAL;
+                paramFile["max_val"]            = MAX_VAL;
+                paramFile["division_factor"]    = DIVISION_FACTOR;
+                paramFile["direction"]          = DIRECTION;
+                file << paramFile;
             } 
         }
     }

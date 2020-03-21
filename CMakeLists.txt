@@ -45,4 +45,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets)
 target_include_directories(${PROJECT_NAME} PUBLIC /usr/local/include)
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC serial)
 
+
+find_package(yaml-cpp REQUIRED)
+target_include_directories(${PROJECT_NAME} PUBLIC ${YAML_CPP_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${YAML_CPP_LIBRARIES})
+
+
 install(DIRECTORY resources DESTINATION $ENV{HOME}/.boat_display FILES_MATCHING PATTERN "*")
+install(DIRECTORY config DESTINATION $ENV{HOME}/.boat_display FILES_MATCHING PATTERN "*")

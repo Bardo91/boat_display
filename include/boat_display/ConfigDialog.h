@@ -31,6 +31,11 @@ namespace rosex{
     public:
         explicit ConfigDialog(std::atomic<int> &_signal, QWidget *_parent = 0);
     
+        int minVal() const;
+        int maxVal() const;
+        int directionVal() const;
+        int divisionVal() const;
+
     private:
         QLabel *valLabel_;
         QSpinBox *minSpin_, *maxSpin_, *divisionSpin_, *directionSpin_;
