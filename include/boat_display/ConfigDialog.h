@@ -30,13 +30,16 @@ namespace rosex{
         Q_OBJECT
     public:
         explicit ConfigDialog(std::atomic<int> &_signal, QWidget *_parent = 0);
-    
+
+	~ConfigDialog();    
+
         int minVal() const;
         int maxVal() const;
         int directionVal() const;
         int divisionVal() const;
 
     private:
+	QTimer *signalTimer_;
         QLabel *valLabel_;
         QSpinBox *minSpin_, *maxSpin_, *divisionSpin_, *directionSpin_;
         std::atomic<int> &signal_;

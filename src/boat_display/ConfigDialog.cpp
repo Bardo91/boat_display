@@ -23,6 +23,7 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QTimer>
 
 #include <yaml-cpp/yaml.h>
 
@@ -94,7 +95,17 @@ namespace rosex{
         directionSpin_->setValue(paramFile["direction"].as<int>());
         divisionSpin_->setValue(paramFile["division_factor"].as<int>());
 
+	signalTimer_ = new QTimer();
+	
+	connect(signalTimer_, &QTimer::timeout, [&](){
+		valLabel_->setText(std::to_string(_signal).c_str());
+	});
+	signalTimer_->start(100);
     }
+
+	ConfigDialog::~ConfigDialog(){
+		signalTimer_->stop();
+	}
 
     //-------------------------------------------------------------------------------------------------------------
     int ConfigDialog::minVal() const{
