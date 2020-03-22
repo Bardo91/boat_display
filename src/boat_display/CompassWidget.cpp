@@ -115,6 +115,12 @@ namespace rosex{
         int signal = int(signalF);
         signal = signal / DIVISION_FACTOR * DIVISION_FACTOR;
 
+	if(DIRECTION == -1){
+		signal = 360 - signal;
+	}
+
+	signal = (signal + 180)%360;
+
         Q_UNUSED(event);
         QPainter p(this);
         p.setFont(QFont( "Arial", 50 ));
@@ -125,7 +131,7 @@ namespace rosex{
         p.drawImage(QPoint(10,10), compass_);
 
         QMatrix matrix;
-        matrix.rotate(DIRECTION*signal);
+        matrix.rotate(signal);
         QImage arrowRot = arrow_.transformed(matrix);
 
         p.drawImage(QPoint( winSize[1]/2 - arrowRot.rect().center().x(),
