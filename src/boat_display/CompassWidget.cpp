@@ -63,7 +63,7 @@ namespace rosex{
 
         if (!serialPort_) {
             try{
-                serialPort_ = new serial::Serial("/dev/ttyACM0", 115200, serial::Timeout::simpleTimeout(1000));
+                serialPort_ = new serial::Serial("/dev/ttyUSB0", 115200, serial::Timeout::simpleTimeout(1000));
             }catch(serial::IOException _e){
                 std::cout << _e.what() <<std::endl;;
                 serialPort_ = nullptr;
