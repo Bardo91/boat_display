@@ -37,11 +37,12 @@ namespace rosex{
         int maxVal() const;
         int directionVal() const;
         int divisionVal() const;
+        int offset() const;
 
     private:
 	QTimer *signalTimer_;
         QLabel *valLabel_;
-        QSpinBox *minSpin_, *maxSpin_, *divisionSpin_, *directionSpin_;
+        QSpinBox *minSpin_, *maxSpin_, *divisionSpin_, *directionSpin_, *offsetSpin_;
         std::atomic<int> &signal_;
     };
 }

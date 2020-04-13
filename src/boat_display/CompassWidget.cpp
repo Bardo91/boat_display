@@ -229,6 +229,7 @@ namespace rosex{
                 MAX_VAL         = configDialog.maxVal();
                 DIVISION_FACTOR = configDialog.divisionVal();
                 DIRECTION       = configDialog.directionVal();
+                OFFSET          = configDialog.offset();
 
                 // Save defaults
                 std::string userDir(getenv("USER"));
@@ -239,6 +240,7 @@ namespace rosex{
                 paramFile["max_val"]            = MAX_VAL;
                 paramFile["division_factor"]    = DIVISION_FACTOR;
                 paramFile["direction"]          = DIRECTION;
+                paramFile["offset"]             = OFFSET;
                 file << paramFile;
                 file.flush();
                 file.close();

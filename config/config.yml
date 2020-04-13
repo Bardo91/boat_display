@@ -1,4 +1,5 @@
 min_val: 170
 max_val: 850
-division_factor: 5
+division_factor: 1
 direction: -1
+offset: 180

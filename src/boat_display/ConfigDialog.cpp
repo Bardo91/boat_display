@@ -82,6 +82,17 @@ namespace rosex{
     
 
         //-------------------------------------------------------------------------------------------------------------
+        QHBoxLayout *offsetLayout = new QHBoxLayout();
+        QLabel *offsetLabelName = new QLabel("Offset value: ");
+        mainLayout->addLayout(offsetLayout);
+        offsetSpin_ = new QSpinBox();
+        offsetSpin_->setMaximum(360);
+        offsetSpin_->setMinimum(0);
+        offsetLayout->addWidget(offsetLabelName);
+        offsetLayout->addWidget(offsetSpin_);
+    
+
+        //-------------------------------------------------------------------------------------------------------------
         // Load defaults
         std::string userDir(getenv("USER"));
         YAML::Node paramFile;
@@ -95,13 +106,14 @@ namespace rosex{
         maxSpin_->setValue(paramFile["max_val"].as<int>());
         directionSpin_->setValue(paramFile["direction"].as<int>());
         divisionSpin_->setValue(paramFile["division_factor"].as<int>());
+        offsetSpin_->setValue(paramFile["offset"].as<int>());
 
-	signalTimer_ = new QTimer();
-	
-	connect(signalTimer_, &QTimer::timeout, [&](){
-		valLabel_->setText(std::to_string(_signal).c_str());
-	});
-	signalTimer_->start(100);
+        signalTimer_ = new QTimer();
+        
+        connect(signalTimer_, &QTimer::timeout, [&](){
+            valLabel_->setText(std::to_string(_signal).c_str());
+        });
+        signalTimer_->start(100);
     }
 
 	ConfigDialog::~ConfigDialog(){
@@ -130,6 +142,11 @@ namespace rosex{
     //-------------------------------------------------------------------------------------------------------------
     int ConfigDialog::divisionVal() const{
         return divisionSpin_->value();
+    }
+
+    //-------------------------------------------------------------------------------------------------------------
+    int ConfigDialog::offset() const{
+        return offsetSpin_->value();
     }
 
 
