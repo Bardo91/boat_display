@@ -152,19 +152,21 @@ namespace rosex{
         p.drawImage(QPoint(0,0), waterBg_);
         // p.setOpacity(0.2);
 
-        p.drawImage(QPoint(10,10), compass_);
+        p.drawImage(QPoint( this->width()/2-compass_.width()/2,
+                            this->height()/2-compass_.height()/2), 
+                    compass_);
 
         QMatrix matrix;
         matrix.rotate(signal);
         QImage arrowRot = arrow_.transformed(matrix);
 
-        p.drawImage(QPoint( winSize[1]/2 - arrowRot.rect().center().x(),
-                            winSize[1]/2 - arrowRot.rect().center().y()), arrowRot);
+        p.drawImage(QPoint( this->width()/2 - arrowRot.width()/2,
+                            this->height()/2 - arrowRot.height()/2), arrowRot);
 
 
-        const QRect rectangle = QRect(winSize[1]+ 50, 50, 240, 100);
-        QRect boundingRect;
-        p.drawText( rectangle, 0, std::to_string(signal).c_str(),&boundingRect);
+        // const QRect rectangle = QRect(winSize[1]+ 50, 50, 240, 100);
+        // QRect boundingRect;
+        // p.drawText( rectangle, 0, std::to_string(signal).c_str(),&boundingRect);
 
         //p.save();
         //p.translate(rect.center());
