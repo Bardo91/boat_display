@@ -85,8 +85,8 @@ namespace rosex{
                 static int signalFake = MIN_VAL;
                 readingThread_ = std::thread([&](){
                     while(run_){
-                        lastSignal_ = signalFake++;
-                        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                        lastSignal_ = signalFake++ + float(rand())/RAND_MAX*10;
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     }
                 });
             }
@@ -113,14 +113,37 @@ namespace rosex{
         float signalF = lastSignal_;
 
         signalF = (MAX_VAL-signalF)/(MAX_VAL-MIN_VAL)*360;
-        int signal = int(signalF);
+        
+        queueValues_.push_back(signalF);
+        if(queueValues_.size() > maxQueueSize_){
+            queueValues_.erase(queueValues_.begin());
+        }
+
+        int signal;
+        if(queueValues_.size() == maxQueueSize_){
+            float sm = 0, cm = 0;
+            for(unsigned i = 0; i < maxQueueSize_; i++){
+                sm += sin(queueValues_[i]*M_PI/180.0f);
+                cm += cos(queueValues_[i]*M_PI/180.0f);
+            }
+            sm /= maxQueueSize_;
+            cm /= maxQueueSize_;
+
+            float medAngle = atan2(sm,cm)*180.0f/M_PI;
+            
+            signal = int(medAngle);
+        }else{
+            signal = int(signalF);
+        }
+
         signal = signal / DIVISION_FACTOR * DIVISION_FACTOR;
 
-	if(DIRECTION == -1){
-		signal = 360 - signal;
-	}
+        if(DIRECTION == -1){
+            signal = 360 - signal;
+        }
 
-	signal = (signal + 180)%360;
+        signal = (signal + OFFSET)%360;
+
 
         Q_UNUSED(event);
         QPainter p(this);
@@ -217,6 +240,8 @@ namespace rosex{
                 paramFile["division_factor"]    = DIVISION_FACTOR;
                 paramFile["direction"]          = DIRECTION;
                 file << paramFile;
+                file.flush();
+                file.close();
             } 
         }
     }

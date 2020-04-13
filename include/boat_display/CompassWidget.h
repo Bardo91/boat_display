@@ -68,10 +68,14 @@ namespace rosex{
 
             std::atomic<int> lastSignal_;
 
+            std::vector<float> queueValues_;
+            int maxQueueSize_ = 20;
+
             float MIN_VAL = 170;
             float MAX_VAL = 850;
             int DIVISION_FACTOR = 5;
             int DIRECTION = -1;
+            int OFFSET = 180;
 
     };
 

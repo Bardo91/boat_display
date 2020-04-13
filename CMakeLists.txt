@@ -34,7 +34,7 @@ file(GLOB_RECURSE HDR_FILES include/*.h include/*.inl)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${HDR_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ./include)
-target_link_directories(${PROJECT_NAME} PRIVATE /usr/local/lib)
+# target_link_directories(${PROJECT_NAME} PRIVATE /usr/local/lib)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 
@@ -48,7 +48,7 @@ target_link_libraries(${PROJECT_NAME} LINK_PUBLIC serial)
 
 find_package(yaml-cpp REQUIRED)
 target_include_directories(${PROJECT_NAME} PUBLIC ${YAML_CPP_INCLUDE_DIR})
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${YAML_CPP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${YAML_CPP_LIBRARIES} yaml-cpp)
 
 
 install(DIRECTORY resources DESTINATION $ENV{HOME}/.boat_display FILES_MATCHING PATTERN "*")
