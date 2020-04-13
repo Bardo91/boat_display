@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cassert>
 
 #include <QImageReader>
 #include <algorithm>

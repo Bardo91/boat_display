@@ -24,6 +24,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTimer>
+#include <cassert>
 
 #include <yaml-cpp/yaml.h>
 
