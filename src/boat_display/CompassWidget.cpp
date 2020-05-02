@@ -42,7 +42,9 @@ namespace rosex{
         this->setWindowState(Qt::WindowFullScreen);
         this->showFullScreen();
 
-
+	logFile_.open(std::string("/home/")+getenv("USER")+"/.boat_display/Log_"+std::to_string(time(NULL))+".txt");
+	logFile_ << "Initializing HMI" << std::endl;
+	logFile_.flush();
         std::string userDir(getenv("USER"));
         std::string resourcesDir = "/home/"+userDir+"/.boat_display/resources/";
         waterBg_ = loadImage(resourcesDir+"water_bg.png");
@@ -50,6 +52,8 @@ namespace rosex{
         arrow_ = loadImage(resourcesDir+"arrow.png");
 
 
+	logFile_ << "Loading configuration" << std::endl;
+	logFile_.flush();
         // Load defaults
         YAML::Node paramFile;
         try{
@@ -64,43 +68,41 @@ namespace rosex{
         DIRECTION = paramFile["direction"].as<int>();
 
         lastSignal_ = MIN_VAL;
-
+	
         // initI2C();
+	logFile_ << "Initializing read thread" << std::endl;
+	logFile_.flush();
+        run_ = true;
 
-        if (!serialPort_) {
-            /*if (serialPort_ != nullptr && serialPort_->isOpen()) {
-                std::cout << "Opened Serial Port" << std::endl;
-*/
-                run_ = true;
-                readingThread_ = std::thread([&](){
-	          openSerialPort();
-                  while(run_){
-                        try{
-                            std::string line = serialPort_->readline();
-                            lastSignal_ = atoi(line.c_str());
+        readingThread_ = std::thread([&](){
+		  openSerialPort();
+		  while(run_){
+		        try{
+		            std::string line = serialPort_->readline();
+				logMutex_.lock();
+				logFile_ << "[SERIAL_THREAD] Read\"" << line << "\" from serial port "<< std::endl;
+				logFile_.flush();
+				logMutex_.unlock();
+		            lastSignal_ = atoi(line.c_str());
 			}catch(serial::IOException _e){
-                            std::cout << _e.what() <<std::endl;
-                            serialPort_ = nullptr;
+		            	logMutex_.lock();
+				logFile_ << "[SERIAL_THREAD] Failed Reading thread" << std::endl;
+				logFile_ << _e.what() <<std::endl;;
+				logFile_.flush();
+				logMutex_.unlock();
+		            serialPort_ = nullptr;
 			    openSerialPort();
-                        } catch(serial::SerialException _e){
-                            std::cout << _e.what() <<std::endl;
-                            serialPort_ = nullptr;
+		        } catch(serial::SerialException _e){
+		            	logMutex_.lock();
+				logFile_ << "[SERIAL_THREAD] Failed Reading thread"<< std::endl;
+				logFile_ << _e.what() <<std::endl;;
+				logFile_.flush();
+				logMutex_.unlock();
+		            serialPort_ = nullptr;
 			    openSerialPort();
-                        }
-                    }
-                });
-            /*}else{
-                std::cout << "Faking serial connection" << std::endl;
-                run_ = true;
-                static int signalFake = MIN_VAL;
-                readingThread_ = std::thread([&](){
-                    while(run_){
-                        lastSignal_ = signalFake++ + float(rand())/RAND_MAX*10;
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                    }
-                });
-            }*/
-        }
+		        }
+		    }
+		});
 
 
     }
@@ -117,17 +119,26 @@ namespace rosex{
 				candidatePorts.push_back(entry.path());
 			}
 		}
-		std::cout << "Found " << candidatePorts.size() << " ports." << std::endl;
+		logMutex_.lock();
+		logFile_ << "[SERIAL_THREAD] Found " << candidatePorts.size() << " ports." << std::endl;
+		logFile_.flush();
+		logMutex_.unlock();
 
 
 		for(auto portPath: candidatePorts){
 			try{
 				serialPort_ = new serial::Serial(portPath, 115200, serial::Timeout::simpleTimeout(1000));
-				std::cout << "connected to :" << portPath << std::endl;
+				logMutex_.lock();
+				logFile_ << "[SERIAL_THREAD] connected to :" << portPath << std::endl;
+				logFile_.flush();
+				logMutex_.unlock();
 				return true;
 			}catch(serial::IOException _e){
-				std::cout << "Failed to connected to :" << portPath << std::endl;
-				std::cout << _e.what() <<std::endl;;
+				logMutex_.lock();
+				logFile_ << "[SERIAL_THREAD] Failed to connected to :" << portPath << std::endl;
+				logFile_ << _e.what() <<std::endl;;
+				logFile_.flush();
+				logMutex_.unlock();
 				serialPort_ = nullptr;
 			}
 		}
@@ -146,6 +157,8 @@ namespace rosex{
             readingThread_.join();
     }
 
+
+static bool switchLabelCheck_ = false;
     void Compass::paintEvent(QPaintEvent *event) {
 
         // uint16_t signal = sensorHandler_.Measure_SingleEnded(0);
@@ -202,7 +215,18 @@ namespace rosex{
         p.drawImage(QPoint( this->width()/2 - arrowRot.width()/2,
                             this->height()/2 - arrowRot.height()/2), arrowRot);
 
+	if(switchLabelCheck_){
+		p.setPen(QPen(QColor(255, 0,0, 255), 3));	
+	} else{
+		p.setPen(QPen(QColor(0,255,0, 255), 3));
+	}
+	switchLabelCheck_ = !switchLabelCheck_;
+	p.drawEllipse(QRectF(0,0,50,50));
 
+	logMutex_.lock();
+	logFile_ << "[PAINT_THREAD] Updated HMI with val\"" << signal << "\""<< std::endl;
+	logFile_.flush();
+	logMutex_.unlock();
         // const QRect rectangle = QRect(winSize[1]+ 50, 50, 240, 100);
         // QRect boundingRect;
         // p.drawText( rectangle, 0, std::to_string(signal).c_str(),&boundingRect);

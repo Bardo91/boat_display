@@ -31,6 +31,8 @@
 #include <thread>
 #include <mutex>
 
+#include <fstream>
+
 namespace rosex{
 
     class Compass : public QMainWindow {
@@ -73,6 +75,9 @@ namespace rosex{
             std::vector<float> queueValues_;
             int maxQueueSize_ = 20;
 
+	    std::ofstream logFile_;
+		std::mutex logMutex_;
+	
             float MIN_VAL = 170;
             float MAX_VAL = 850;
             int DIVISION_FACTOR = 5;
