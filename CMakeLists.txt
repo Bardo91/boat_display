@@ -34,6 +34,8 @@ file(GLOB_RECURSE HDR_FILES include/*.h include/*.inl)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${HDR_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ./include)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
+target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
 # target_link_directories(${PROJECT_NAME} PRIVATE /usr/local/lib)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE pthread)

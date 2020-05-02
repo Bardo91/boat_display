@@ -31,6 +31,11 @@
 #include <boat_display/ConfigDialog.h>
 
 #include <yaml-cpp/yaml.h>
+
+
+#include <filesystem>
+namespace fs = std::filesystem;
+
 namespace rosex{
     Compass::Compass(QWidget *parent) : QMainWindow(parent) {
         this->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
@@ -63,23 +68,28 @@ namespace rosex{
         // initI2C();
 
         if (!serialPort_) {
-            try{
-                serialPort_ = new serial::Serial("/dev/ttyUSB0", 115200, serial::Timeout::simpleTimeout(1000));
-            }catch(serial::IOException _e){
-                std::cout << _e.what() <<std::endl;;
-                serialPort_ = nullptr;
-            }
-            if (serialPort_ != nullptr && serialPort_->isOpen()) {
+            /*if (serialPort_ != nullptr && serialPort_->isOpen()) {
                 std::cout << "Opened Serial Port" << std::endl;
-
+*/
                 run_ = true;
                 readingThread_ = std::thread([&](){
-                    while(run_){
-                        std::string line = serialPort_->readline();
-                        lastSignal_ = atoi(line.c_str());
+	          openSerialPort();
+                  while(run_){
+                        try{
+                            std::string line = serialPort_->readline();
+                            lastSignal_ = atoi(line.c_str());
+			}catch(serial::IOException _e){
+                            std::cout << _e.what() <<std::endl;
+                            serialPort_ = nullptr;
+			    openSerialPort();
+                        } catch(serial::SerialException _e){
+                            std::cout << _e.what() <<std::endl;
+                            serialPort_ = nullptr;
+			    openSerialPort();
+                        }
                     }
                 });
-            }else{
+            /*}else{
                 std::cout << "Faking serial connection" << std::endl;
                 run_ = true;
                 static int signalFake = MIN_VAL;
@@ -89,10 +99,39 @@ namespace rosex{
                         std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     }
                 });
-            }
+            }*/
         }
 
 
+    }
+
+    bool Compass::openSerialPort(){
+	while(serialPort_ == nullptr){
+		std::string path = "/dev/";
+		std::vector<std::string> candidatePorts;
+
+		for (const auto & entry : fs::directory_iterator(path)){
+			if(entry.path().string().find("ACM") != std::string::npos){
+				candidatePorts.push_back(entry.path());
+			} else if(entry.path().string().find("USB") != std::string::npos){
+				candidatePorts.push_back(entry.path());
+			}
+		}
+		std::cout << "Found " << candidatePorts.size() << " ports." << std::endl;
+
+
+		for(auto portPath: candidatePorts){
+			try{
+				serialPort_ = new serial::Serial(portPath, 115200, serial::Timeout::simpleTimeout(1000));
+				std::cout << "connected to :" << portPath << std::endl;
+				return true;
+			}catch(serial::IOException _e){
+				std::cout << "Failed to connected to :" << portPath << std::endl;
+				std::cout << _e.what() <<std::endl;;
+				serialPort_ = nullptr;
+			}
+		}
+	}
     }
 
     Compass::~Compass(){

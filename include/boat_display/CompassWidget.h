@@ -53,6 +53,8 @@ namespace rosex{
 
             void keyPressEvent(QKeyEvent *_event) override;
 
+	    bool openSerialPort();
+
         private:
             QRect rect;
             float orientation_;
