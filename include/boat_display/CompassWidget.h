@@ -23,6 +23,7 @@
 
 #include <QtGui>
 #include <QMainWindow>
+#include <QTimer>
 #include <boat_display/ADS1115.h>
 
 #include <serial/serial.h>
@@ -75,9 +76,13 @@ namespace rosex{
             std::vector<float> queueValues_;
             int maxQueueSize_ = 20;
 
+            QTimer *paintTimer_;
+
 	    std::ofstream logFile_;
 		std::mutex logMutex_;
 	
+            std::chrono::steady_clock::time_point t0;
+      
             float MIN_VAL = 170;
             float MAX_VAL = 850;
             int DIVISION_FACTOR = 5;

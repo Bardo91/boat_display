@@ -42,6 +42,8 @@ namespace rosex{
         this->setWindowState(Qt::WindowFullScreen);
         this->showFullScreen();
 
+        t0 = std::chrono::steady_clock::now();
+
 	logFile_.open(std::string("/home/")+getenv("USER")+"/.boat_display/Log_"+std::to_string(time(NULL))+".txt");
 	logFile_ << "Initializing HMI" << std::endl;
 	logFile_.flush();
@@ -79,32 +81,37 @@ namespace rosex{
 		  while(run_){
 		        try{
 		            std::string line = serialPort_->readline();
-				logMutex_.lock();
-				logFile_ << "[SERIAL_THREAD] Read\"" << line << "\" from serial port "<< std::endl;
-				logFile_.flush();
-				logMutex_.unlock();
+				//logMutex_.lock();
+				//logFile_ << "[SERIAL_THREAD] Read\"" << line << "\" from serial port "<< std::endl;
+				//logFile_.flush();
+				//logMutex_.unlock();
 		            lastSignal_ = atoi(line.c_str());
 			}catch(serial::IOException _e){
-		            	logMutex_.lock();
-				logFile_ << "[SERIAL_THREAD] Failed Reading thread" << std::endl;
-				logFile_ << _e.what() <<std::endl;;
-				logFile_.flush();
-				logMutex_.unlock();
+		            	//logMutex_.lock();
+				//logFile_ << "[SERIAL_THREAD] Failed Reading thread" << std::endl;
+				//logFile_ << _e.what() <<std::endl;;
+				//logFile_.flush();
+				//logMutex_.unlock();
 		            serialPort_ = nullptr;
 			    openSerialPort();
 		        } catch(serial::SerialException _e){
-		            	logMutex_.lock();
-				logFile_ << "[SERIAL_THREAD] Failed Reading thread"<< std::endl;
-				logFile_ << _e.what() <<std::endl;;
-				logFile_.flush();
-				logMutex_.unlock();
+		            	//logMutex_.lock();
+				//logFile_ << "[SERIAL_THREAD] Failed Reading thread"<< std::endl;
+				//logFile_ << _e.what() <<std::endl;;
+				//logFile_.flush();
+				//logMutex_.unlock();
 		            serialPort_ = nullptr;
 			    openSerialPort();
 		        }
 		    }
 		});
 
-
+        paintTimer_ = new QTimer();
+        connect(paintTimer_, &QTimer::timeout, [&](){
+                this->repaint();
+                });
+        paintTimer_->start(1000);
+        
     }
 
     bool Compass::openSerialPort(){
@@ -212,8 +219,22 @@ static bool switchLabelCheck_ = false;
         matrix.rotate(signal);
         QImage arrowRot = arrow_.transformed(matrix);
 
+
         p.drawImage(QPoint( this->width()/2 - arrowRot.width()/2,
                             this->height()/2 - arrowRot.height()/2), arrowRot);
+
+        /// DEBUG draw
+/*        
+        auto t1 = std::chrono::steady_clock::now();
+        auto incT = std::chrono::duration_cast<std::chrono::seconds>(t1-t0).count();
+        int h = incT / 3600;
+        int m = (incT - h*3600)/60;
+        int s = incT - h*3600 - m*60;
+        
+        std::string clockTime = std::to_string(h) + ":"+std::to_string(m)+":"+std::to_string(s);
+        
+        p.drawText(0,100, clockTime.c_str());
+
 
 	if(switchLabelCheck_){
 		p.setPen(QPen(QColor(255, 0,0, 255), 3));	
@@ -222,11 +243,11 @@ static bool switchLabelCheck_ = false;
 	}
 	switchLabelCheck_ = !switchLabelCheck_;
 	p.drawEllipse(QRectF(0,0,50,50));
-
-	logMutex_.lock();
-	logFile_ << "[PAINT_THREAD] Updated HMI with val\"" << signal << "\""<< std::endl;
-	logFile_.flush();
-	logMutex_.unlock();
+*/
+	//logMutex_.lock();
+	//logFile_ << "[PAINT_THREAD] Updated HMI with val\"" << signal << "\""<< std::endl;
+	//logFile_.flush();
+	//logMutex_.unlock();
         // const QRect rectangle = QRect(winSize[1]+ 50, 50, 240, 100);
         // QRect boundingRect;
         // p.drawText( rectangle, 0, std::to_string(signal).c_str(),&boundingRect);
