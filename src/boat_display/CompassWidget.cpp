@@ -44,9 +44,9 @@ namespace rosex{
 
         t0 = std::chrono::steady_clock::now();
 
-	logFile_.open(std::string("/home/")+getenv("USER")+"/.boat_display/Log_"+std::to_string(time(NULL))+".txt");
-	logFile_ << "Initializing HMI" << std::endl;
-	logFile_.flush();
+//	logFile_.open(std::string("/home/")+getenv("USER")+"/.boat_display/Log_"+std::to_string(time(NULL))+".txt");
+//	logFile_ << "Initializing HMI" << std::endl;
+//	logFile_.flush();
         std::string userDir(getenv("USER"));
         std::string resourcesDir = "/home/"+userDir+"/.boat_display/resources/";
         waterBg_ = loadImage(resourcesDir+"water_bg.png").scaled(800,480);
@@ -54,8 +54,8 @@ namespace rosex{
         arrow_ = loadImage(resourcesDir+"arrow.png");
 
 
-	logFile_ << "Loading configuration" << std::endl;
-	logFile_.flush();
+//	logFile_ << "Loading configuration" << std::endl;
+//	logFile_.flush();
         // Load defaults
         YAML::Node paramFile;
         try{
@@ -73,8 +73,8 @@ namespace rosex{
         lastSignal_ = MIN_VAL;
 	
         // initI2C();
-	logFile_ << "Initializing read thread" << std::endl;
-	logFile_.flush();
+//	logFile_ << "Initializing read thread" << std::endl;
+//	logFile_.flush();
         run_ = true;
 
         readingThread_ = std::thread([&](){
@@ -127,26 +127,26 @@ namespace rosex{
 				candidatePorts.push_back(entry.path());
 			}
 		}
-		logMutex_.lock();
-		logFile_ << "[SERIAL_THREAD] Found " << candidatePorts.size() << " ports." << std::endl;
-		logFile_.flush();
-		logMutex_.unlock();
+//		logMutex_.lock();
+//		logFile_ << "[SERIAL_THREAD] Found " << candidatePorts.size() << " ports." << std::endl;
+//		logFile_.flush();
+//		logMutex_.unlock();
 
 
 		for(auto portPath: candidatePorts){
 			try{
 				serialPort_ = new serial::Serial(portPath, 115200, serial::Timeout::simpleTimeout(1000));
-				logMutex_.lock();
-				logFile_ << "[SERIAL_THREAD] connected to :" << portPath << std::endl;
-				logFile_.flush();
-				logMutex_.unlock();
+//				logMutex_.lock();
+//				logFile_ << "[SERIAL_THREAD] connected to :" << portPath << std::endl;
+//				logFile_.flush();
+//				logMutex_.unlock();
 				return true;
 			}catch(serial::IOException _e){
-				logMutex_.lock();
-				logFile_ << "[SERIAL_THREAD] Failed to connected to :" << portPath << std::endl;
-				logFile_ << _e.what() <<std::endl;;
-				logFile_.flush();
-				logMutex_.unlock();
+//				logMutex_.lock();
+//				logFile_ << "[SERIAL_THREAD] Failed to connected to :" << portPath << std::endl;
+//				logFile_ << _e.what() <<std::endl;;
+//				logFile_.flush();
+//				logMutex_.unlock();
 				serialPort_ = nullptr;
 			}
 		}
