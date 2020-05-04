@@ -68,7 +68,8 @@ namespace rosex{
         MAX_VAL = paramFile["max_val"].as<int>();
         DIVISION_FACTOR = paramFile["division_factor"].as<int>();
         DIRECTION = paramFile["direction"].as<int>();
-
+        OFFSET = paramFile["offset"].as<int>();
+	
         lastSignal_ = MIN_VAL;
 	
         // initI2C();
