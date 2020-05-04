@@ -49,7 +49,7 @@ namespace rosex{
 	logFile_.flush();
         std::string userDir(getenv("USER"));
         std::string resourcesDir = "/home/"+userDir+"/.boat_display/resources/";
-        waterBg_ = loadImage(resourcesDir+"water_bg.png");
+        waterBg_ = loadImage(resourcesDir+"water_bg.png").scaled(800,480);
         compass_ = loadImage(resourcesDir+"compass.png");
         arrow_ = loadImage(resourcesDir+"arrow.png");
 
@@ -211,18 +211,23 @@ static bool switchLabelCheck_ = false;
         p.drawImage(QPoint(0,0), waterBg_);
         // p.setOpacity(0.2);
 
-        p.drawImage(QPoint( this->width()/2-compass_.width()/2,
+        QPoint cornerCompass(20,10);
+
+        /*p.drawImage(QPoint( this->width()/2-compass_.width()/2,
                             this->height()/2-compass_.height()/2), 
-                    compass_);
+                    compass_);*/
+            p.drawImage(cornerCompass, compass_);
 
         QMatrix matrix;
         matrix.rotate(signal);
         QImage arrowRot = arrow_.transformed(matrix);
 
-
-        p.drawImage(QPoint( this->width()/2 - arrowRot.width()/2,
-                            this->height()/2 - arrowRot.height()/2), arrowRot);
-
+        QPoint cornerArrow(     cornerCompass.x() + compass_.width()/2- arrowRot.width()/2,
+                                cornerCompass.y() + compass_.height()/2- arrowRot.height()/2
+                                );
+        /*p.drawImage(QPoint( this->width()/2 - arrowRot.width()/2,
+                            this->height()/2 - arrowRot.height()/2), arrowRot);*/
+        p.drawImage(cornerArrow, arrowRot);
         /// DEBUG draw
 /*        
         auto t1 = std::chrono::steady_clock::now();
